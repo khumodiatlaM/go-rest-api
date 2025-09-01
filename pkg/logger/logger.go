@@ -5,7 +5,7 @@ import "go.uber.org/zap"
 var sugar *zap.SugaredLogger
 
 func NewLogger() (*zap.SugaredLogger, error) {
-	if sugar != nil {
+	if sugar == nil {
 		logger, err := zap.NewDevelopment()
 		if err != nil {
 			return nil, err
