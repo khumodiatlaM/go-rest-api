@@ -18,4 +18,5 @@ func main() {
 	}
 
 	logger.Info("Configuration loaded", "config", cfg)
+	logger.Debug("Database DSN:", cfg.GetDBConnectionString())
 }
