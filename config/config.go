@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
 )
 
@@ -30,10 +29,4 @@ func LoadConfig() (Config, error) {
 
 	err = viper.Unmarshal(&config)
 	return config, err
-}
-
-// GetDBConnectionString constructs the database connection string
-func (cfg *Config) GetDBConnectionString() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 }
