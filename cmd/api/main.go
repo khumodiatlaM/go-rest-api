@@ -9,12 +9,12 @@ func main() {
 	// ... initialize logger
 	logger, err := logger.NewLogger()
 	if err != nil {
-		logger.Fatalf("Error initializing logger: %v", err)
+		logger.Fatal("Failed to initialize logger", "error", err)
 	}
 	// ... initialize configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		logger.Fatalf("Error loading config: %v", err)
+		logger.Fatal("Error loading config: %v", err)
 	}
 
 	logger.Info("Configuration loaded", "config", cfg)

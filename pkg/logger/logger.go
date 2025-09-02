@@ -2,21 +2,30 @@ package logger
 
 import "go.uber.org/zap"
 
-var sugar *zap.SugaredLogger
-
-func NewLogger() (*zap.SugaredLogger, error) {
-	if sugar == nil {
-		logger, err := zap.NewDevelopment()
-		if err != nil {
-			return nil, err
-		}
-		sugar = logger.Sugar()
-	}
-	return sugar, nil
+type Logger struct {
+	logger *zap.SugaredLogger
 }
 
-func Sync() {
-	if sugar != nil {
-		_ = sugar.Sync()
+func (l *Logger) Info(args ...interface{}) {
+	l.logger.Info(args...)
+}
+
+func (l *Logger) Error(args ...interface{}) {
+	l.logger.Error(args...)
+}
+
+func (l *Logger) Fatal(args ...interface{}) {
+	l.logger.Fatal(args...)
+}
+
+func NewLogger() (Logger, error) {
+	l := Logger{}
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		return l, err
 	}
+	defer logger.Sync() // flushes buffer, if any
+	s := logger.Sugar()
+	l.logger = s
+	return l, nil
 }
