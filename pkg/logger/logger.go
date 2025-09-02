@@ -18,6 +18,10 @@ func (l *Logger) Fatal(args ...interface{}) {
 	l.logger.Fatal(args...)
 }
 
+func (l *Logger) Debug(args ...interface{}) {
+	l.logger.Debug(args...)
+}
+
 func NewLogger() (Logger, error) {
 	l := Logger{}
 	logger, err := zap.NewDevelopment()
