@@ -10,10 +10,10 @@ import (
 
 type UserRepository struct {
 	db     *pgxpool.Pool
-	logger logger.Logger
+	logger logger.CustomLogger
 }
 
-func NewUserRepository(db *pgxpool.Pool, logger logger.Logger) core.UserRepository {
+func NewUserRepository(db *pgxpool.Pool, logger logger.CustomLogger) core.UserRepository {
 	return &UserRepository{
 		db:     db,
 		logger: logger,

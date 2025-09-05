@@ -9,7 +9,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func StartServer(port string, router *httprouter.Router, logger logger.Logger) {
+func StartServer(port string, router *httprouter.Router, logger logger.CustomLogger) {
 	// validate port
 	if port == "" {
 		port = "8080" // default port

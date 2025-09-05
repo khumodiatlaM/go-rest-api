@@ -3,13 +3,14 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"go-rest-api/pkg/logger"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Connect establishes a connection to the PostgreSQL database
-func Connect(cfg DbConfig, logger logger.Logger) (*pgxpool.Pool, error) {
+func Connect(cfg DbConfig, logger logger.CustomLogger) (*pgxpool.Pool, error) {
 	logger.Info("Connecting to the database...")
 	connConfig, err := pgxpool.ParseConfig(cfg.GetDBConnectionString())
 	if err != nil {
