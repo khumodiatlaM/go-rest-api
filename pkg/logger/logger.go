@@ -6,23 +6,23 @@ type Logger struct {
 	logger *zap.SugaredLogger
 }
 
-func (l *Logger) Info(args ...interface{}) {
+func (l Logger) Info(args ...interface{}) {
 	l.logger.Info(args...)
 }
 
-func (l *Logger) Error(args ...interface{}) {
+func (l Logger) Error(args ...interface{}) {
 	l.logger.Error(args...)
 }
 
-func (l *Logger) Fatal(args ...interface{}) {
+func (l Logger) Fatal(args ...interface{}) {
 	l.logger.Fatal(args...)
 }
 
-func (l *Logger) Debug(args ...interface{}) {
+func (l Logger) Debug(args ...interface{}) {
 	l.logger.Debug(args...)
 }
 
-func NewLogger() (Logger, error) {
+func NewLogger() (CustomLogger, error) {
 	l := Logger{}
 	logger, err := zap.NewDevelopment()
 	if err != nil {
