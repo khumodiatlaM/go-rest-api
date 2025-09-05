@@ -1,0 +1,14 @@
+#Create User
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "username": "JaneDoe44",
+  "email": "janedoe@gmail.com",
+  "password": "password123"
+}
+
+###
+
+#Get User by ID
+GET http://localhost:8080/users/3236f664-4e67-49f3-9043-3b8f60ccab0d
