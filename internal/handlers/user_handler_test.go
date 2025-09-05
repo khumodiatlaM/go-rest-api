@@ -72,6 +72,50 @@ func (testSuite *UserHandlerTestSuite) TestCreateUser() {
 	a.Equal(http.StatusCreated, res.Code)
 }
 
+//func (testSuite *UserHandlerTestSuite) TestGetUser() {
+//	t := testSuite.T()
+//	a := assert.New(t)
+//
+//	// given
+//	router := httprouter.New()
+//	path := "/users/:id"
+//	router.GET(path, func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+//		testSuite.userHandler.GetUser(w, r, ps)
+//	})
+//	// First, create a user to ensure there is one to retrieve
+//	user := CreateUserRequest{
+//		Username: "testuser2",
+//		Email:    "test2@user.com",
+//		Password: "password123",
+//	}
+//	reqBody, err := json.Marshal(user)
+//	a.NoError(err)
+//
+//	// ... create user
+//	createReq := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
+//	createReq.Header.Set("Content-Type", "application/json")
+//	createRes := httptest.NewRecorder()
+//	router.POST("/users", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+//		testSuite.userHandler.CreateUser(w, r)
+//	})
+//
+//	// when ... we get the user by ID
+//	getReq := httptest.NewRequest(http.MethodGet, "/users/:id", nil)
+//	getReq.Header.Set("Content-Type", "application/json")
+//	getRes := httptest.NewRecorder()
+//	router.ServeHTTP(createRes, createReq)
+//	router.ServeHTTP(getRes, getReq)
+//
+//	// then
+//	a.Equal(http.StatusOK, getRes.Code)
+//    var resultBody GetUserResponse
+//	err = json.Unmarshal(getRes.Body.Bytes(), &resultBody)
+//	a.NoError(err)
+//	if diff := cmp.Diff(resultBody.Username, user.Username); diff != "" {
+//		t.Error(diff)
+//	}
+//}
+
 func TestUserHandlerTestSuite(t *testing.T) {
 	suite.Run(t, new(UserHandlerTestSuite))
 }
