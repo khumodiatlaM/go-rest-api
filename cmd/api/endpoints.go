@@ -10,6 +10,11 @@ import (
 func SetupRouter(userHandler *handlers.UserHandler) *httprouter.Router {
 	router := httprouter.New()
 
+	// ... health check endpoint
+	router.GET("/health", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		handlers.HeathCheck(w, r)
+	})
+
 	// ... create user endpoint
 	router.POST("/users", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		userHandler.CreateUser(w, r)

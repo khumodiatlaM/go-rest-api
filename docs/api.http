@@ -1,3 +1,8 @@
+# Heatlth Check
+GET http://localhost:8080/health
+
+###
+
 #Create User
 POST http://localhost:8080/users
 Content-Type: application/json

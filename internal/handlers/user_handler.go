@@ -24,6 +24,11 @@ func NewUserHandler(userService UserService) *UserHandler {
 	}
 }
 
+func HeathCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"available"}`))
+}
+
 func (u *CreateUserRequest) ToUser() core.User {
 	return core.User{
 		Username: u.Username,
