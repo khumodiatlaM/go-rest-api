@@ -21,3 +21,11 @@ func NewUserService(repo UserRepository, logger logger.Logger) *UserService {
 		logger: logger,
 	}
 }
+
+func (s *UserService) CreateUser(ctx context.Context, user *User) error {
+	return s.repo.CreateUser(ctx, user)
+}
+
+func (s *UserService) GetUserByID(ctx context.Context, id string) (*User, error) {
+	return s.repo.GetUserByID(ctx, id)
+}
