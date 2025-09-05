@@ -43,6 +43,7 @@ func CreateDbTestContainer(ctx context.Context, t *testing.T) (*pgxpool.Pool, fu
 
 	dsn := "postgres://testuser:testpassword@" + host + ":" + port.Port() + "/testdb?sslmode=disable"
 	// ... run migrations
+	RunMigrations(t, dsn)
 
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {

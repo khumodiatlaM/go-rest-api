@@ -14,25 +14,34 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
 type UserHandlerTestSuite struct {
 	suite.Suite
 	userHandler *UserHandler
+	tearDown    func()
 }
 
 func (testSuite *UserHandlerTestSuite) SetupSuite() {
 	ctx := context.Background()
 	t := testSuite.T()
 	dbPool, teardown := test.CreateDbTestContainer(ctx, t)
-	defer teardown()
+	testSuite.tearDown = teardown
 
 	mockLogger := logger.MockLogger{}
+	mockLogger.On("Error", mock.Anything).Return()
 	userRepo := db.NewUserRepository(dbPool, &mockLogger)
 	userServ := core.NewUserService(userRepo, &mockLogger)
 	userHandler := NewUserHandler(userServ)
 	testSuite.userHandler = userHandler
+}
+
+func (testSuite *UserHandlerTestSuite) TearDownSuite() {
+	if testSuite.tearDown != nil {
+		testSuite.tearDown()
+	}
 }
 
 func (testSuite *UserHandlerTestSuite) TestCreateUser() {
