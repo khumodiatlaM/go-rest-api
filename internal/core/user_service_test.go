@@ -33,6 +33,28 @@ func TestUserService_CreateUser(t *testing.T) {
 	a.NoError(err)
 }
 
+func TestUserService_CreateUser_ReturnsError(t *testing.T) {
+	a := assert.New(t)
+	// given
+	mockLogger := logger.MockLogger{}
+	mockUserRepo := MockUserRepository{}
+	userService := NewUserService(&mockUserRepo, &mockLogger)
+
+	testUser := User{
+		ID:       uuid.New(),
+		Username: "JohnDoe123",
+		Email:    "johndoe@gmail.com",
+		Password: "hashedpassword",
+	}
+	mockUserRepo.On("CreateUser", mock.Anything, &testUser).Return(assert.AnError)
+
+	// when
+	err := userService.CreateUser(context.Background(), &testUser)
+
+	// then
+	a.Error(err)
+}
+
 func TestUserService_GetUser(t *testing.T) {
 	a := assert.New(t)
 	// given
@@ -56,4 +78,38 @@ func TestUserService_GetUser(t *testing.T) {
 	// then
 	a.NoError(err)
 	a.Equal(&testUser, user)
+}
+
+func TestUserService_GetUser_NotFound(t *testing.T) {
+	a := assert.New(t)
+	// given
+	mockLogger := logger.MockLogger{}
+	mockUserRepo := MockUserRepository{}
+	userService := NewUserService(&mockUserRepo, &mockLogger)
+
+	mockUserRepo.On("GetUserByID", mock.Anything, "non-existent-id").Return(nil, nil)
+
+	// when
+	user, err := userService.GetUserByID(context.Background(), "non-existent-id")
+
+	// then
+	a.NoError(err)
+	a.Nil(user)
+}
+
+func TestUserService_GetUser_ReturnAnError(t *testing.T) {
+	a := assert.New(t)
+	// given
+	mockLogger := logger.MockLogger{}
+	mockUserRepo := MockUserRepository{}
+	userService := NewUserService(&mockUserRepo, &mockLogger)
+
+	mockUserRepo.On("GetUserByID", mock.Anything, "some-id").Return(nil, assert.AnError)
+
+	// when
+	user, err := userService.GetUserByID(context.Background(), "some-id")
+
+	// then
+	a.Error(err)
+	a.Nil(user)
 }
