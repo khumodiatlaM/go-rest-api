@@ -2,9 +2,10 @@ package db
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"go-rest-api/internal/core"
 	"go-rest-api/pkg/logger"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserRepository struct {
@@ -20,7 +21,7 @@ func NewUserRepository(db *pgxpool.Pool, logger logger.Logger) core.UserReposito
 }
 
 func (u *UserRepository) CreateUser(ctx context.Context, user *core.User) error {
-	const query = `INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3)`
+	const query = `INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3, $4)`
 
 	_, err := u.db.Exec(ctx, query,
 		user.ID,
