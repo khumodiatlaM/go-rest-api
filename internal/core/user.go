@@ -3,6 +3,9 @@ package core
 import (
 	"context"
 	"go-rest-api/pkg/logger"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type UserRepository interface {
@@ -23,6 +26,9 @@ func NewUserService(repo UserRepository, logger logger.Logger) *UserService {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, user *User) error {
+	user.ID = uuid.New()
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 	return s.repo.CreateUser(ctx, user)
 }
 
