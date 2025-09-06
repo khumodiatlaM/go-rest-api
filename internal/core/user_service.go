@@ -50,6 +50,11 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (st
 		return "", err
 	}
 
+	if user == nil {
+		s.logger.Error("user not found with email: ", email)
+		return "", nil
+	}
+
 	if err = VerifyPassword(user.Password, password); err != nil {
 		s.logger.Error("password verification failed: ", err)
 		return "", err
