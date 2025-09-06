@@ -25,5 +25,10 @@ func SetupRouter(userHandler *handlers.UserHandler) *httprouter.Router {
 		userHandler.GetUser(w, r)
 	})
 
+	// ... login user endpoint
+	router.POST("/users/login", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		userHandler.LoginUser(w, r)
+	})
+
 	return router
 }

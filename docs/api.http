@@ -16,4 +16,14 @@ Content-Type: application/json
 ###
 
 #Get User by ID
-GET http://localhost:8080/users/3236f664-4e67-49f3-9043-3b8f60ccab0d
+GET http://localhost:8080/users/93a4f90c-74e8-4a97-a563-422ecde5e2bd
+
+###
+#Login User
+POST http://localhost:8080/users/login
+Content-Type: application/json
+
+{
+  "email": "janedoe@gmail.com",
+  "password": "password123"
+}
