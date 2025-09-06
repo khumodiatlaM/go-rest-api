@@ -16,6 +16,10 @@ This project is a boilerplate for building a production-ready REST API in Go. It
 * **Testcontainers-go:** To spin up a real database in a Docker container for isolated integration tests.
 * **Golang Migrate:** A CLI tool for managing database schema migrations.
 * **Juliensmit/httprouter:** A fast and simple HTTP router.
+* **Go Modules:** For dependency management.
+* **golang-jwt/jwt/v5:** For secure JWT authentication.
+* **bcrypt:** For secure password hashing.
+* **Makefile:** For automating common tasks like building, testing, and running migrations.
 
 ***
 
@@ -96,8 +100,10 @@ make test-integration
 ### API Endpoints
 The API provides the following endpoints:
 * `GET /health`:    Check the health status of the API.
-* `GER /users/:id`: Retrieve a user by id.
 * `POST /users`:    Create a new user.
+* `POST /users/login`: Authenticate a user and return a JWT token.
+* `GER /users/:id`: Retrieve a user by id. **(Protected, requires JWT token)**
+
 
 ### Documentation
 For detailed API documentation, refer to the `docs/` directory.
