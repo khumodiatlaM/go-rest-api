@@ -21,14 +21,26 @@ func NewUserRepository(db *pgxpool.Pool, logger logger.CustomLogger) core.UserRe
 	}
 }
 
+func (usr *User) ToCoreUser() *core.User {
+	return &core.User{
+		ID:        usr.ID,
+		Username:  usr.Username,
+		Email:     usr.Email,
+		CreatedAt: usr.CreatedAt,
+		UpdatedAt: usr.UpdatedAt,
+	}
+}
+
 func (u *UserRepository) CreateUser(ctx context.Context, user *core.User) (*core.User, error) {
-	const query = `INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3, $4)`
+	const query = `INSERT INTO users (id, username, email, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`
 
 	_, err := u.db.Exec(ctx, query,
 		user.ID,
 		user.Username,
 		user.Email,
 		user.Password,
+		user.CreatedAt,
+		user.UpdatedAt,
 	)
 
 	if err != nil {
@@ -51,15 +63,8 @@ func (u *UserRepository) CreateUser(ctx context.Context, user *core.User) (*core
 		return nil, err
 	}
 
-	// Map to core.User
-	*user = core.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}
-	return user, nil
+	// Map to core.User and return
+	return createdUser.ToCoreUser(), nil
 }
 
 func (u *UserRepository) GetUserByID(ctx context.Context, id string) (*core.User, error) {
@@ -84,12 +89,6 @@ func (u *UserRepository) GetUserByID(ctx context.Context, id string) (*core.User
 		return nil, nil
 	}
 
-	// Map to core.User
-	return &core.User{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}, nil
+	// Map to core.User and return
+	return user.ToCoreUser(), nil
 }
