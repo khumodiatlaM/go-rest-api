@@ -13,6 +13,7 @@ import (
 type UserService interface {
 	CreateUser(ctx context.Context, user *core.User) (*core.User, error)
 	GetUserByID(ctx context.Context, id string) (*core.User, error)
+	LoginUser(ctx context.Context, email, password string) (string, error)
 }
 
 type UserHandler struct {
@@ -109,4 +110,35 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(ToUserResponse(*user))
+}
+
+func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var userReq LoginUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
+		http.Error(w, "Invalid login user request payload", http.StatusBadRequest)
+		return
+	}
+
+	// ... validate request data
+	if userReq.Email == "" || userReq.Password == "" {
+		http.Error(w, "Email and password are required", http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.userService.LoginUser(r.Context(), strings.ToLower(userReq.Email), userReq.Password)
+	if err != nil {
+		http.Error(w, "Failed to login user: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if token == "" {
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(LoginUserResponse{token})
 }

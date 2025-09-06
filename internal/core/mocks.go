@@ -55,3 +55,11 @@ func (s *MockUserService) GetUserByID(ctx context.Context, id string) (*User, er
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
+
+func (s *MockUserService) LoginUserRequest(ctx context.Context, email, password string) (*User, error) {
+	args := s.Called(ctx, email, password)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*User), args.Error(1)
+}
