@@ -11,6 +11,7 @@ type Config struct {
 	DBPassword string `mapstructure:"DB_PASSWORD"`
 	DBName     string `mapstructure:"DB_NAME"`
 	APIPort    string `mapstructure:"API_PORT"`
+	JWTSecret  string `mapstructure:"JWT_SECRET"`
 }
 
 // LoadConfig reads configuration from file or environment variables.
