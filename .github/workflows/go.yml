@@ -30,11 +30,11 @@ jobs:
       - name: Install migrate tool
         run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
+      - name: Build
+        run: make build
+
       - name: Run unit tests
         run: make test-unit
 
       - name: Run integration tests
         run: make test-integration
-
-      - name: Build
-        run: make build
