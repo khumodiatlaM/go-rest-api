@@ -21,9 +21,13 @@ func SetupRouter(userHandler *handlers.UserHandler) *httprouter.Router {
 	})
 
 	// ... get user by ID endpoint
-	router.GET("/users/:id", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		userHandler.GetUser(w, r)
-	})
+	router.GET("/users/:id", handlers.AuthMiddleware(
+		func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			userHandler.GetUser(w, r)
+		},
+		userHandler.JwtSecret,
+		userHandler.Logger,
+	))
 
 	// ... login user endpoint
 	router.POST("/users/login", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

@@ -1,9 +1,4 @@
-# Heatlth Check
-GET http://localhost:8080/health
-
-###
-
-#Create User
+# @name createUser
 POST http://localhost:8080/users
 Content-Type: application/json
 
@@ -15,11 +10,7 @@ Content-Type: application/json
 
 ###
 
-#Get User by ID
-GET http://localhost:8080/users/93a4f90c-74e8-4a97-a563-422ecde5e2bd
-
-###
-#Login User
+# @name loginUser
 POST http://localhost:8080/users/login
 Content-Type: application/json
 
@@ -27,3 +18,13 @@ Content-Type: application/json
   "email": "janedoe@gmail.com",
   "password": "password123"
 }
+
+
+###
+
+# @name getUserById
+GET http://localhost:8080/users/f538c8aa-2451-4a3d-8a64-b7111e72a904
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTcxODk2MzUsInVzZXJfaWQiOiJmNTM4YzhhYS0yNDUxLTRhM2QtOGE2NC1iNzExMWU3MmE5MDQifQ.4icOJukeMt55YLw9jz3nRSBZdWh5TxYik3kM7k41_5Q
+
+# Heatlth Check
+GET http://localhost:8080/health

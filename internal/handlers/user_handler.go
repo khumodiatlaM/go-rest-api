@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"go-rest-api/internal/core"
+	"go-rest-api/pkg/logger"
 	"net/http"
 	"strings"
 	"time"
@@ -18,13 +19,15 @@ type UserService interface {
 
 type UserHandler struct {
 	userService UserService
-	jwtSecret   string
+	Logger      logger.CustomLogger
+	JwtSecret   string
 }
 
-func NewUserHandler(userService UserService, jwtSecret string) *UserHandler {
+func NewUserHandler(userService UserService, logger logger.CustomLogger, jwtSecret string) *UserHandler {
 	return &UserHandler{
 		userService: userService,
-		jwtSecret:   jwtSecret,
+		Logger:      logger,
+		JwtSecret:   jwtSecret,
 	}
 }
 
@@ -91,7 +94,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Second)
 	defer cancel()
 
 	id := r.URL.Path[len("/users/"):]
@@ -130,7 +133,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.userService.LoginUser(r.Context(), strings.ToLower(userReq.Email), userReq.Password, h.jwtSecret)
+	token, err := h.userService.LoginUser(r.Context(), strings.ToLower(userReq.Email), userReq.Password, h.JwtSecret)
 	if err != nil {
 		http.Error(w, "Failed to login user: "+err.Error(), http.StatusInternalServerError)
 		return
