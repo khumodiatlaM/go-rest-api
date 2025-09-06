@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"go-rest-api/internal/core"
 	"net/http"
 	"strings"
@@ -47,6 +48,19 @@ func ToUserResponse(u core.User) UserResponse {
 	}
 }
 
+func (req *CreateUserRequest) Validate() error {
+	if req.Username == "" {
+		return errors.New("username is required")
+	}
+	if req.Email == "" || !strings.Contains(req.Email, "@") {
+		return errors.New("valid email is required")
+	}
+	if len(req.Password) < 6 {
+		return errors.New("password must be at least 6 characters long")
+	}
+	return nil
+}
+
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -54,6 +68,11 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userReq CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
 		http.Error(w, "Invalid create user request payload", http.StatusBadRequest)
+		return
+	}
+
+	if err := userReq.Validate(); err != nil {
+		http.Error(w, "Validation error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
