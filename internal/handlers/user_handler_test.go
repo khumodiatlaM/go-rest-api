@@ -190,6 +190,7 @@ func (testSuite *UserHandlerTestSuite) TestGetUser() {
 		email,
 		password,
 	)
+	a.NoError(err)
 
 	// when ... we get the user by ID
 	getReq := httptest.NewRequest(http.MethodGet, path, nil)
@@ -231,6 +232,189 @@ func (testSuite *UserHandlerTestSuite) TestGetUser_NotFound() {
 
 	// then
 	a.Equal(http.StatusNotFound, getRes.Code)
+}
+
+func (testSuite *UserHandlerTestSuite) TestLoginUser() {
+	t := testSuite.T()
+	a := assert.New(t)
+
+	// given
+	Id := uuid.New()
+	router := httprouter.New()
+	path := "/users/" + Id.String()
+	router.GET(path, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		testSuite.userHandler.GetUser(w, r)
+	})
+
+	// First, create a user to ensure there is one to login
+
+	username := "testuser35"
+	email := "testuse373r@gmail.com"
+	password := "password123"
+	hashedPassword, err := test.HashPassword(password)
+	a.NoError(err)
+	ctx := context.Background()
+
+	const query = `INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3, $4)`
+	_, err = testSuite.dbPool.Exec(ctx, query,
+		Id,
+		username,
+		email,
+		hashedPassword,
+	)
+	a.NoError(err)
+
+	// when ... we login the user
+	loginPath := "/users/login"
+	router.POST(loginPath, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		testSuite.userHandler.LoginUser(w, r)
+	})
+	loginReqBody, err := json.Marshal(map[string]string{
+		"email":    email,
+		"password": password,
+	})
+	a.NoError(err)
+
+	loginReq := httptest.NewRequest(http.MethodPost, loginPath, bytes.NewBuffer(loginReqBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginRes := httptest.NewRecorder()
+	router.ServeHTTP(loginRes, loginReq)
+
+	// then
+	a.Equal(http.StatusOK, loginRes.Code)
+	var resultBody LoginUserResponse
+	err = json.Unmarshal(loginRes.Body.Bytes(), &resultBody)
+	a.NoError(err)
+	a.NotEmpty(resultBody.Token)
+}
+
+func (testSuite *UserHandlerTestSuite) TestLoginUser_ReturnsError() {
+	t := testSuite.T()
+	a := assert.New(t)
+
+	// given
+	Id := uuid.New()
+	router := httprouter.New()
+	path := "/users/" + Id.String()
+	router.GET(path, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		testSuite.userHandler.GetUser(w, r)
+	})
+
+	// First, create a user to ensure there is one to login
+
+	username := "testuser35"
+	email := "testuse373r@gmail.com"
+	password := "password123"
+	hashedPassword, err := test.HashPassword(password)
+	a.NoError(err)
+	ctx := context.Background()
+
+	const query = `INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3, $4)`
+	_, err = testSuite.dbPool.Exec(ctx, query,
+		Id,
+		username,
+		email,
+		hashedPassword,
+	)
+	a.NoError(err)
+
+	// when ... we login the user
+	loginPath := "/users/login"
+	router.POST(loginPath, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		testSuite.userHandler.LoginUser(w, r)
+	})
+	loginReqBody, err := json.Marshal(map[string]string{
+		"email":    email,
+		"password": "wrongpassword",
+	})
+	a.NoError(err)
+
+	loginReq := httptest.NewRequest(http.MethodPost, loginPath, bytes.NewBuffer(loginReqBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginRes := httptest.NewRecorder()
+	router.ServeHTTP(loginRes, loginReq)
+
+	// then
+	a.Equal(http.StatusInternalServerError, loginRes.Code)
+}
+
+func (testSuite *UserHandlerTestSuite) TestLoginUser_NotFound() {
+	t := testSuite.T()
+	a := assert.New(t)
+
+	// given
+
+	router := httprouter.New()
+	loginPath := "/users/login"
+	router.POST(loginPath, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		testSuite.userHandler.LoginUser(w, r)
+	})
+
+	loginReqBody, err := json.Marshal(map[string]string{
+		"email":    "test@gmail.com",
+		"password": "password123",
+	})
+	a.NoError(err)
+
+	// when ... we login the user
+	loginReq := httptest.NewRequest(http.MethodPost, loginPath, bytes.NewBuffer(loginReqBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginRes := httptest.NewRecorder()
+	router.ServeHTTP(loginRes, loginReq)
+
+	// then
+	a.Equal(http.StatusUnauthorized, loginRes.Code)
+}
+
+func (testSuite *UserHandlerTestSuite) TestLoginUser_InvalidPayload() {
+	t := testSuite.T()
+	a := assert.New(t)
+
+	// given
+	router := httprouter.New()
+	loginPath := "/users/login"
+	router.POST(loginPath, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		testSuite.userHandler.LoginUser(w, r)
+	})
+
+	loginReqBody, err := json.Marshal("invalid payload")
+	a.NoError(err)
+
+	// when ... we login the user
+	loginReq := httptest.NewRequest(http.MethodPost, loginPath, bytes.NewBuffer(loginReqBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginRes := httptest.NewRecorder()
+	router.ServeHTTP(loginRes, loginReq)
+
+	// then
+	a.Equal(http.StatusBadRequest, loginRes.Code)
+}
+
+func (testSuite *UserHandlerTestSuite) TestLoginUser_MissingEmail() {
+	t := testSuite.T()
+	a := assert.New(t)
+
+	// given
+	router := httprouter.New()
+	loginPath := "/users/login"
+	router.POST(loginPath, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		testSuite.userHandler.LoginUser(w, r)
+	})
+
+	loginReqBody, err := json.Marshal(map[string]string{
+		"email":    "",
+		"password": "password123",
+	})
+	a.NoError(err)
+
+	// when ... we login the user
+	loginReq := httptest.NewRequest(http.MethodPost, loginPath, bytes.NewBuffer(loginReqBody))
+	loginReq.Header.Set("Content-Type", "application/json")
+	loginRes := httptest.NewRecorder()
+	router.ServeHTTP(loginRes, loginReq)
+
+	// then
+	a.Equal(http.StatusBadRequest, loginRes.Code)
 }
 
 func TestUserHandlerTestSuite(t *testing.T) {
