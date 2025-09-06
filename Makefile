@@ -31,4 +31,5 @@ test-unit:
 
 ## Run integration tests
 test-integration:
-	go test -tags 'integration' -v ./internal/handlers/ ./internal/db
+	go test -tags 'integration' -v ./internal/handlers/... && \
+	go test -tags 'integration' -v ./internal/db/...
