@@ -5,7 +5,7 @@ import (
 	"go-rest-api/internal/core"
 	"go-rest-api/pkg/logger"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -79,14 +79,14 @@ func (u *UserRepository) GetUserByID(ctx context.Context, id string) (*core.User
 		&user.UpdatedAt,
 	)
 
+	if err != nil && err == pgx.ErrNoRows {
+		u.logger.Info("user not found", id)
+		return nil, nil
+	}
+
 	if err != nil {
 		u.logger.Error("failed to get user by id", err, id)
 		return nil, err
-	}
-
-	if user.ID == uuid.Nil {
-		u.logger.Info("user not found", id)
-		return nil, nil
 	}
 
 	// Map to core.User and return
