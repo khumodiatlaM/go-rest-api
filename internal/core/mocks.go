@@ -27,6 +27,14 @@ func (r *MockUserRepository) GetUserByID(ctx context.Context, id string) (*User,
 	return args.Get(0).(*User), args.Error(1)
 }
 
+func (r *MockUserRepository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
+	args := r.Called(ctx, email)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*User), args.Error(1)
+}
+
 // ---------------------------------
 // MockUserService
 // ---------------------------------
