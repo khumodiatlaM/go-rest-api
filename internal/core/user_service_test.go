@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -24,13 +25,16 @@ func TestUserService_CreateUser(t *testing.T) {
 		Email:    "johndoe@gmail.com",
 		Password: "hashedpassword",
 	}
-	mockUserRepo.On("CreateUser", mock.Anything, &testUser).Return(nil)
+	mockUserRepo.On("CreateUser", mock.Anything, &testUser).Return(&testUser, nil)
 
 	// when
-	err := userService.CreateUser(context.Background(), &testUser)
+	user, err := userService.CreateUser(context.Background(), &testUser)
 
 	// then
 	a.NoError(err)
+	if diff := cmp.Diff(testUser, *user); diff != "" {
+		t.Error(diff)
+	}
 }
 
 func TestUserService_CreateUser_ReturnsError(t *testing.T) {
@@ -46,10 +50,10 @@ func TestUserService_CreateUser_ReturnsError(t *testing.T) {
 		Email:    "johndoe@gmail.com",
 		Password: "hashedpassword",
 	}
-	mockUserRepo.On("CreateUser", mock.Anything, &testUser).Return(assert.AnError)
+	mockUserRepo.On("CreateUser", mock.Anything, &testUser).Return(&User{}, assert.AnError)
 
 	// when
-	err := userService.CreateUser(context.Background(), &testUser)
+	_, err := userService.CreateUser(context.Background(), &testUser)
 
 	// then
 	a.Error(err)
