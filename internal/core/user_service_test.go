@@ -117,3 +117,78 @@ func TestUserService_GetUser_ReturnAnError(t *testing.T) {
 	a.Error(err)
 	a.Nil(user)
 }
+
+func TestUserService_AuthenticateUser(t *testing.T) {
+	a := assert.New(t)
+
+	// given
+	mockLogger := logger.MockLogger{}
+	mockUserRepo := MockUserRepository{}
+	userService := NewUserService(&mockUserRepo, &mockLogger)
+
+	hashedPassword, err := HashPassword("password")
+	testUser := User{
+		ID:        uuid.New(),
+		Username:  "JohnDoe13",
+		Email:     "JohnDoe13@gamil.com",
+		Password:  hashedPassword,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	mockUserRepo.On("GetUserByEmail", mock.Anything, testUser.Email).Return(&testUser, nil)
+
+	// when
+	user, err := userService.AuthenticateUser(context.Background(), testUser.Email, "password")
+
+	// then
+	a.NoError(err)
+	if diff := cmp.Diff(testUser, *user); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUserService_AuthenticateUser_WrongPassword(t *testing.T) {
+	a := assert.New(t)
+
+	// given
+	mockLogger := logger.MockLogger{}
+	mockLogger.On("Error", mock.Anything, mock.Anything).Return()
+	mockUserRepo := MockUserRepository{}
+	userService := NewUserService(&mockUserRepo, &mockLogger)
+
+	hashedPassword, err := HashPassword("password")
+	testUser := User{
+		ID:        uuid.New(),
+		Username:  "JohnDoe13",
+		Email:     "JohnDoe13@gamil.com",
+		Password:  hashedPassword,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	mockUserRepo.On("GetUserByEmail", mock.Anything, testUser.Email).Return(&testUser, nil)
+
+	// when
+	result, err := userService.AuthenticateUser(context.Background(), testUser.Email, "wrongpassword")
+
+	// then
+	a.Error(err)
+	a.Nil(result)
+}
+
+func TestUserService_AuthenticateUser_ReturnsError(t *testing.T) {
+	a := assert.New(t)
+	// given
+	mockLogger := logger.MockLogger{}
+	mockLogger.On("Error", mock.Anything, mock.Anything).Return()
+	mockUserRepo := MockUserRepository{}
+	userService := NewUserService(&mockUserRepo, &mockLogger)
+
+	mockUserRepo.On("GetUserByEmail", mock.Anything, "non-existent-email").Return(&User{}, assert.AnError)
+
+	// when
+	result, err := userService.AuthenticateUser(context.Background(), "non-existent-email", "password")
+
+	// then
+	a.Error(err)
+	a.Nil(result)
+}
