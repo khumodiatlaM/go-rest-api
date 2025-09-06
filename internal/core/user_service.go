@@ -43,17 +43,23 @@ func (s *UserService) GetUserByID(ctx context.Context, id string) (*User, error)
 	return s.repo.GetUserByID(ctx, id)
 }
 
-func (s *UserService) AuthenticateUser(ctx context.Context, email, password string) (*User, error) {
+func (s *UserService) LoginUser(ctx context.Context, email, password string) (string, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		s.logger.Error("failed to get user by email for authentication: ", err)
-		return nil, err
+		return "", err
 	}
 
 	if err = VerifyPassword(user.Password, password); err != nil {
 		s.logger.Error("password verification failed: ", err)
-		return nil, err
+		return "", err
 	}
-	user.Password = ""
-	return user, nil
+
+	token, err := GenerateAuthToken(user.ID, "jwt-secret")
+	if err != nil {
+		s.logger.Error("failed to generate auth token: ", err)
+		return "", err
+	}
+
+	return token, nil
 }

@@ -118,7 +118,7 @@ func TestUserService_GetUser_ReturnAnError(t *testing.T) {
 	a.Nil(user)
 }
 
-func TestUserService_AuthenticateUser(t *testing.T) {
+func TestUserService_LoginUser(t *testing.T) {
 	a := assert.New(t)
 
 	// given
@@ -138,16 +138,14 @@ func TestUserService_AuthenticateUser(t *testing.T) {
 	mockUserRepo.On("GetUserByEmail", mock.Anything, testUser.Email).Return(&testUser, nil)
 
 	// when
-	user, err := userService.AuthenticateUser(context.Background(), testUser.Email, "password")
+	token, err := userService.LoginUser(context.Background(), testUser.Email, "password")
 
 	// then
 	a.NoError(err)
-	if diff := cmp.Diff(testUser, *user); diff != "" {
-		t.Error(diff)
-	}
+	a.NotEmpty(token)
 }
 
-func TestUserService_AuthenticateUser_WrongPassword(t *testing.T) {
+func TestUserService_Login_WrongPassword(t *testing.T) {
 	a := assert.New(t)
 
 	// given
@@ -168,14 +166,14 @@ func TestUserService_AuthenticateUser_WrongPassword(t *testing.T) {
 	mockUserRepo.On("GetUserByEmail", mock.Anything, testUser.Email).Return(&testUser, nil)
 
 	// when
-	result, err := userService.AuthenticateUser(context.Background(), testUser.Email, "wrongpassword")
+	token, err := userService.LoginUser(context.Background(), testUser.Email, "wrongpassword")
 
 	// then
 	a.Error(err)
-	a.Nil(result)
+	a.Empty(token)
 }
 
-func TestUserService_AuthenticateUser_ReturnsError(t *testing.T) {
+func TestUserService_Login_ReturnsError(t *testing.T) {
 	a := assert.New(t)
 	// given
 	mockLogger := logger.MockLogger{}
@@ -186,9 +184,9 @@ func TestUserService_AuthenticateUser_ReturnsError(t *testing.T) {
 	mockUserRepo.On("GetUserByEmail", mock.Anything, "non-existent-email").Return(&User{}, assert.AnError)
 
 	// when
-	result, err := userService.AuthenticateUser(context.Background(), "non-existent-email", "password")
+	token, err := userService.LoginUser(context.Background(), "non-existent-email", "password")
 
 	// then
 	a.Error(err)
-	a.Nil(result)
+	a.Empty(token)
 }
