@@ -56,13 +56,13 @@ func ToUserResponse(u core.User) UserResponse {
 
 func (req *CreateUserRequest) Validate() error {
 	if req.Username == "" {
-		return errors.New("username is required")
+		return errors.New("Username is required")
 	}
 	if req.Email == "" || !strings.Contains(req.Email, "@") {
-		return errors.New("valid email is required")
+		return errors.New("Valid email is required")
 	}
 	if len(req.Password) < 6 {
-		return errors.New("password must be at least 6 characters long")
+		return errors.New("Password must be at least 6 characters long")
 	}
 	return nil
 }
@@ -73,19 +73,19 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	var userReq CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
-		http.Error(w, "Invalid create user request payload", http.StatusBadRequest)
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if err := userReq.Validate(); err != nil {
-		http.Error(w, "Validation error: "+err.Error(), http.StatusBadRequest)
+		writeJSONErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user := userReq.ToUser()
 	result, err := h.userService.CreateUser(ctx, &user)
 	if err != nil {
-		http.Error(w, "Failed to create user: "+err.Error(), http.StatusInternalServerError)
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
 
@@ -99,17 +99,17 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Path[len("/users/"):]
 	if id == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
+		writeJSONErrorResponse(w, http.StatusBadRequest, "User Id is required")
 		return
 	}
 
 	user, err := h.userService.GetUserByID(ctx, id)
 	if err != nil {
-		http.Error(w, "Failed to get user: "+err.Error(), http.StatusInternalServerError)
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "User not found")
 		return
 	}
 	if user == nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		writeJSONErrorResponse(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -123,27 +123,33 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	var userReq LoginUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
-		http.Error(w, "Invalid login user request payload", http.StatusBadRequest)
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// ... validate request data
 	if userReq.Email == "" || userReq.Password == "" {
-		http.Error(w, "Email and password are required", http.StatusBadRequest)
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Email and password are required")
 		return
 	}
 
 	token, err := h.userService.LoginUser(r.Context(), strings.ToLower(userReq.Email), userReq.Password, h.JwtSecret)
 	if err != nil {
-		http.Error(w, "Failed to login user: "+err.Error(), http.StatusInternalServerError)
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Failed to login user")
 		return
 	}
 
 	if token == "" {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		writeJSONErrorResponse(w, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(LoginUserResponse{token})
+}
+
+func writeJSONErrorResponse(w http.ResponseWriter, status int, errorMsg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(APIError{errorMsg})
 }
