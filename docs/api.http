@@ -23,8 +23,9 @@ Content-Type: application/json
 ###
 
 # @name getUserById
-GET http://localhost:8080/users/f538c8aa-2451-4a3d-8a64-b7111e72a904
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTcxODk2MzUsInVzZXJfaWQiOiJmNTM4YzhhYS0yNDUxLTRhM2QtOGE2NC1iNzExMWU3MmE5MDQifQ.4icOJukeMt55YLw9jz3nRSBZdWh5TxYik3kM7k41_5Q
-
+# Replace <USER_ID> with the actual user ID obtained from the createUser response
+# Replace <TOKEN> with the actual token obtained from the loginUser response
+GET http://localhost:8080/users/<USER_ID>
+Authorization: Bearer <TOKEN>
 # Heatlth Check
 GET http://localhost:8080/health
