@@ -32,14 +32,32 @@ func (u *UserRepository) CreateUser(ctx context.Context, user *core.User) (*core
 	)
 
 	if err != nil {
-		u.logger.Error(err, user.ID)
+		u.logger.Error(err)
 		return nil, err
 	}
-	// ... retrieve the created user
-	user, err = u.GetUserByID(ctx, user.ID.String())
+	createdUser := &User{}
+	// Fetch the created user
+	getUserQuery := `SELECT id, username, email, created_at, updated_at FROM users WHERE id = $1`
+	err = u.db.QueryRow(ctx, getUserQuery, user.ID).Scan(
+		&createdUser.ID,
+		&createdUser.Username,
+		&createdUser.Email,
+		&createdUser.CreatedAt,
+		&createdUser.UpdatedAt,
+	)
+
 	if err != nil {
-		u.logger.Error("failed to get user by id", err, user.ID)
+		u.logger.Error("failed to fetch created user", err, user.ID)
 		return nil, err
+	}
+
+	// Map to core.User
+	*user = core.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 	return user, nil
 }
