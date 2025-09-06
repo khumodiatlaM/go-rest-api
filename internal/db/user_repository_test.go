@@ -149,6 +149,51 @@ func (testSuite *UserRepositoryTestSuite) TestUserRepository_GetUserByID_Invalid
 	a.Nil(user)
 }
 
+func (testSuite *UserRepositoryTestSuite) TestUserRepository_GetUserByEmail() {
+	t := testSuite.T()
+	a := assert.New(t)
+	// given
+	testUser := core.User{
+		ID:        uuid.New(),
+		Username:  "JohnDoe633",
+		Email:     "johdoe142562@gmail.com",
+		Password:  "hashedpassword",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	// ... first create the user
+	createdUser, err := testSuite.userRepo.CreateUser(context.Background(), &testUser)
+	a.NoError(err)
+
+	// when
+	user, err := testSuite.userRepo.GetUserByEmail(context.Background(), createdUser.Email)
+
+	// then
+	expectedUser := core.User{
+		ID:        testUser.ID,
+		Username:  testUser.Username,
+		Email:     testUser.Email,
+		CreatedAt: testUser.CreatedAt,
+		UpdatedAt: testUser.UpdatedAt,
+	}
+	a.NoError(err)
+	if diff := cmp.Diff(&expectedUser, user, cmpopts.IgnoreFields(core.User{}, "Password", "CreatedAt", "UpdatedAt")); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func (testSuite *UserRepositoryTestSuite) TestUserRepository_GetUserByEmail_UserNotFound() {
+	t := testSuite.T()
+	a := assert.New(t)
+	// when
+	user, err := testSuite.userRepo.GetUserByEmail(context.Background(), "test@gmail.co.za")
+
+	// then
+	a.NoError(err)
+	a.Nil(user)
+}
+
 func TestNewUserRepositoryTestSuite(t *testing.T) {
 	suite.Run(t, new(UserRepositoryTestSuite))
 }

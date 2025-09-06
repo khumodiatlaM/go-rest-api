@@ -92,3 +92,32 @@ func (u *UserRepository) GetUserByID(ctx context.Context, id string) (*core.User
 	// Map to core.User and return
 	return user.ToCoreUser(), nil
 }
+
+func (u *UserRepository) GetUserByEmail(ctx context.Context, email string) (*core.User, error) {
+	const query = `SELECT id, username, email, password, created_at, updated_at FROM users WHERE email = $1`
+
+	user := &User{}
+	err := u.db.QueryRow(ctx, query, email).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil && err == pgx.ErrNoRows {
+		u.logger.Info("user not found", email)
+		return nil, nil
+	}
+
+	if err != nil {
+		u.logger.Error("failed to get user by email", err, email)
+		return nil, err
+	}
+
+	// Map to core.User and return
+	result := user.ToCoreUser()
+	result.Password = user.Password
+	return result, nil
+}
