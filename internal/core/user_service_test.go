@@ -135,10 +135,11 @@ func TestUserService_LoginUser(t *testing.T) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+	jwtSecret := "mysecretkey"
 	mockUserRepo.On("GetUserByEmail", mock.Anything, testUser.Email).Return(&testUser, nil)
 
 	// when
-	token, err := userService.LoginUser(context.Background(), testUser.Email, "password")
+	token, err := userService.LoginUser(context.Background(), testUser.Email, "password", jwtSecret)
 
 	// then
 	a.NoError(err)
@@ -163,10 +164,11 @@ func TestUserService_Login_WrongPassword(t *testing.T) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+	jwtSecret := "mysecretkey"
 	mockUserRepo.On("GetUserByEmail", mock.Anything, testUser.Email).Return(&testUser, nil)
 
 	// when
-	token, err := userService.LoginUser(context.Background(), testUser.Email, "wrongpassword")
+	token, err := userService.LoginUser(context.Background(), testUser.Email, "wrongpassword", jwtSecret)
 
 	// then
 	a.Error(err)
@@ -176,6 +178,7 @@ func TestUserService_Login_WrongPassword(t *testing.T) {
 func TestUserService_Login_ReturnsError(t *testing.T) {
 	a := assert.New(t)
 	// given
+	jwtSecret := "mysecretkey"
 	mockLogger := logger.MockLogger{}
 	mockLogger.On("Error", mock.Anything, mock.Anything).Return()
 	mockUserRepo := MockUserRepository{}
@@ -184,7 +187,7 @@ func TestUserService_Login_ReturnsError(t *testing.T) {
 	mockUserRepo.On("GetUserByEmail", mock.Anything, "non-existent-email").Return(&User{}, assert.AnError)
 
 	// when
-	token, err := userService.LoginUser(context.Background(), "non-existent-email", "password")
+	token, err := userService.LoginUser(context.Background(), "non-existent-email", "password", jwtSecret)
 
 	// then
 	a.Error(err)

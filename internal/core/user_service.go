@@ -43,7 +43,7 @@ func (s *UserService) GetUserByID(ctx context.Context, id string) (*User, error)
 	return s.repo.GetUserByID(ctx, id)
 }
 
-func (s *UserService) LoginUser(ctx context.Context, email, password string) (string, error) {
+func (s *UserService) LoginUser(ctx context.Context, email, password, jwtSecret string) (string, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		s.logger.Error("failed to get user by email for authentication: ", err)
@@ -60,7 +60,7 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (st
 		return "", err
 	}
 
-	token, err := GenerateAuthToken(user.ID, "jwt-secret")
+	token, err := GenerateAuthToken(user.ID, jwtSecret)
 	if err != nil {
 		s.logger.Error("failed to generate auth token: ", err)
 		return "", err

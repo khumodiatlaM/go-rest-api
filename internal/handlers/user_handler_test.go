@@ -43,7 +43,7 @@ func (testSuite *UserHandlerTestSuite) SetupSuite() {
 	mockLogger.On("Info", mock.Anything, mock.Anything).Return()
 	userRepo := db.NewUserRepository(dbPool, &mockLogger)
 	userServ := core.NewUserService(userRepo, &mockLogger)
-	userHandler := NewUserHandler(userServ)
+	userHandler := NewUserHandler(userServ, "testsecret")
 	testSuite.userHandler = userHandler
 }
 
@@ -302,8 +302,8 @@ func (testSuite *UserHandlerTestSuite) TestLoginUser_ReturnsError() {
 
 	// First, create a user to ensure there is one to login
 
-	username := "testuser35"
-	email := "testuse373r@gmail.com"
+	username := "testuser305"
+	email := "testuse3093r@gmail.com"
 	password := "password123"
 	hashedPassword, err := test.HashPassword(password)
 	a.NoError(err)

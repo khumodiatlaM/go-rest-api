@@ -13,16 +13,18 @@ import (
 type UserService interface {
 	CreateUser(ctx context.Context, user *core.User) (*core.User, error)
 	GetUserByID(ctx context.Context, id string) (*core.User, error)
-	LoginUser(ctx context.Context, email, password string) (string, error)
+	LoginUser(ctx context.Context, email, password, jwtSecret string) (string, error)
 }
 
 type UserHandler struct {
 	userService UserService
+	jwtSecret   string
 }
 
-func NewUserHandler(userService UserService) *UserHandler {
+func NewUserHandler(userService UserService, jwtSecret string) *UserHandler {
 	return &UserHandler{
 		userService: userService,
+		jwtSecret:   jwtSecret,
 	}
 }
 
@@ -128,7 +130,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.userService.LoginUser(r.Context(), strings.ToLower(userReq.Email), userReq.Password)
+	token, err := h.userService.LoginUser(r.Context(), strings.ToLower(userReq.Email), userReq.Password, h.jwtSecret)
 	if err != nil {
 		http.Error(w, "Failed to login user: "+err.Error(), http.StatusInternalServerError)
 		return

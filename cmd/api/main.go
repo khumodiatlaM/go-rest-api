@@ -44,7 +44,7 @@ func main() {
 	userService := core.NewUserService(userRepository, logger)
 
 	// ... initialize user handler
-	userHandler := handlers.NewUserHandler(userService)
+	userHandler := handlers.NewUserHandler(userService, cfg.JWTSecret)
 
 	// ... setup router
 	router := SetupRouter(userHandler)
