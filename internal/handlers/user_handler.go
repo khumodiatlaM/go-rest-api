@@ -37,8 +37,9 @@ func (u *CreateUserRequest) ToUser() core.User {
 	}
 }
 
-func ToGetUserResponse(u core.User) GetUserResponse {
-	return GetUserResponse{
+func ToUserResponse(u core.User) UserResponse {
+	return UserResponse{
+		Id:        u.ID,
 		Username:  u.Username,
 		Email:     u.Email,
 		CreatedAt: u.CreatedAt,
@@ -87,5 +88,5 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(ToGetUserResponse(*user))
+	json.NewEncoder(w).Encode(ToUserResponse(*user))
 }
