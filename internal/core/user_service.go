@@ -9,7 +9,7 @@ import (
 )
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, user *User) error
+	CreateUser(ctx context.Context, user *User) (*User, error)
 	GetUserByID(ctx context.Context, id string) (*User, error)
 }
 
@@ -25,7 +25,7 @@ func NewUserService(repo UserRepository, logger logger.CustomLogger) *UserServic
 	}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, user *User) error {
+func (s *UserService) CreateUser(ctx context.Context, user *User) (*User, error) {
 	user.ID = uuid.New()
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()

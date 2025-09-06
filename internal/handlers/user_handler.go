@@ -10,7 +10,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, user *core.User) error
+	CreateUser(ctx context.Context, user *core.User) (*core.User, error)
 	GetUserByID(ctx context.Context, id string) (*core.User, error)
 }
 
@@ -58,13 +58,14 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := userReq.ToUser()
-	if err := h.userService.CreateUser(ctx, &user); err != nil {
+	result, err := h.userService.CreateUser(ctx, &user)
+	if err != nil {
 		http.Error(w, "Failed to create user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User created successfully", "user_id": user.Username})
+	json.NewEncoder(w).Encode(ToUserResponse(*result))
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {

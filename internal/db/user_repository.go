@@ -5,6 +5,7 @@ import (
 	"go-rest-api/internal/core"
 	"go-rest-api/pkg/logger"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -20,7 +21,7 @@ func NewUserRepository(db *pgxpool.Pool, logger logger.CustomLogger) core.UserRe
 	}
 }
 
-func (u *UserRepository) CreateUser(ctx context.Context, user *core.User) error {
+func (u *UserRepository) CreateUser(ctx context.Context, user *core.User) (*core.User, error) {
 	const query = `INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3, $4)`
 
 	_, err := u.db.Exec(ctx, query,
@@ -32,9 +33,15 @@ func (u *UserRepository) CreateUser(ctx context.Context, user *core.User) error 
 
 	if err != nil {
 		u.logger.Error(err, user.ID)
-		return err
+		return nil, err
 	}
-	return nil
+	// ... retrieve the created user
+	user, err = u.GetUserByID(ctx, user.ID.String())
+	if err != nil {
+		u.logger.Error("failed to get user by id", err, user.ID)
+		return nil, err
+	}
+	return user, nil
 }
 
 func (u *UserRepository) GetUserByID(ctx context.Context, id string) (*core.User, error) {
@@ -52,6 +59,11 @@ func (u *UserRepository) GetUserByID(ctx context.Context, id string) (*core.User
 	if err != nil {
 		u.logger.Error("failed to get user by id", err, id)
 		return nil, err
+	}
+
+	if user.ID == uuid.Nil {
+		u.logger.Info("user not found", id)
+		return nil, nil
 	}
 
 	// Map to core.User
