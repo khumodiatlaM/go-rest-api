@@ -5,8 +5,8 @@ import (
 )
 
 type KafkaConfig struct {
-	Brokers string `mapstructure:"KAFKA_BROKERS"`
-	Topic   string `mapstructure:"KAFKA_TOPIC"`
+	Broker string `mapstructure:"KAFKA_BROKER"`
+	Topic  string `mapstructure:"KAFKA_TOPIC"`
 }
 type Config struct {
 	DBHost     string `mapstructure:"DB_HOST"`
@@ -34,5 +34,6 @@ func LoadConfig() (Config, error) {
 	}
 
 	err = viper.Unmarshal(&config)
+	err = viper.Unmarshal(&config.Kafka)
 	return config, err
 }
