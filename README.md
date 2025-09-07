@@ -19,6 +19,7 @@ This project is a boilerplate for building a production-ready REST API in Go. It
 * **Go Modules:** For dependency management.
 * **golang-jwt/jwt/v5:** For secure JWT authentication.
 * **bcrypt:** For secure password hashing.
+* **Prometheus:** For collecting and monitoring API metrics.
 * **Makefile:** For automating common tasks like building, testing, and running migrations.
 
 ***
@@ -34,7 +35,9 @@ The project is organized into the following directories:
 │   ├── core/           # Business logic, Domain models and interfaces
 │   ├── handlers/       # HTTP handlers
 │   └── db/             # Data access layer
-├── pkg/                # Shared utilities and packages         
+|   └── metrics/        # Prometheus metrics setup
+├── pkg/                # Shared utilities and packages  
+├── docs/               # API documentation
 ├── migrations/         # Database migration files
 ├── tests/              # Integration and unit tests
 ├── .env.example        # Example environment variables file
@@ -69,10 +72,10 @@ Copy the `.env.example` file to `.env` and modify it as needed:
 ```bash
 cp .env.example .env
 ```
-### 3. Run the PostgreSQL database using Docker Compose
+### 3. Run the PostgreSQL database, Prometheus, and Grafana using Docker Compose
 
 ```bash
-docker-compose up -d
+make docker-up
 ``` 
 ### 4. Run database migrations
 Make sure you have `golang-migrate` installed. Then run:
@@ -103,6 +106,10 @@ The API provides the following endpoints:
 * `POST /users`:    Create a new user.
 * `POST /users/login`: Authenticate a user and return a JWT token.
 * `GER /users/:id`: Retrieve a user by id. **(Protected, requires JWT token)**
+
+
+### Monitoring
+The API is instrumented with Prometheus metrics for monitoring. You can access the metrics at http://localhost:8080/metrics.
 
 
 ### Documentation
