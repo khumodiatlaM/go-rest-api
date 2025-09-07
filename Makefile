@@ -1,6 +1,12 @@
 
 DB_DSN := "postgres://user:password@localhost:5438/rest_api_db?sslmode=disable"
 
+## Makefile for managing the Go REST API project
+
+## docker compose up
+docker-up:
+	docker-compose up -d
+
 ## Start the Postgres container
 run-db-container:
 	docker-compose up -d db
