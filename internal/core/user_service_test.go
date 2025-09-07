@@ -43,6 +43,7 @@ func TestUserService_CreateUser_ReturnsError(t *testing.T) {
 	a := assert.New(t)
 	// given
 	mockLogger := logger.MockLogger{}
+	mockLogger.On("Error", mock.Anything, mock.Anything).Return()
 	mockUserRepo := MockUserRepository{}
 	mockUserEvent := MockUserEventService{}
 	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
