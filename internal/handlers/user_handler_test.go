@@ -42,7 +42,9 @@ func (testSuite *UserHandlerTestSuite) SetupSuite() {
 	mockLogger.On("Error", mock.Anything, mock.Anything, mock.Anything).Return()
 	mockLogger.On("Info", mock.Anything, mock.Anything).Return()
 	userRepo := db.NewUserRepository(dbPool, &mockLogger)
-	userServ := core.NewUserService(userRepo, &mockLogger)
+	mockUserEvent := core.MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userServ := core.NewUserService(userRepo, &mockLogger, &mockUserEvent)
 	userHandler := NewUserHandler(userServ, &mockLogger, "testsecret")
 	testSuite.userHandler = userHandler
 }
