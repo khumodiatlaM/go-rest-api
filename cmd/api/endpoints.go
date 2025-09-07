@@ -5,34 +5,65 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func SetupRouter(userHandler *handlers.UserHandler) *httprouter.Router {
 	router := httprouter.New()
 
 	// ... health check endpoint
-	router.GET("/health", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		handlers.HeathCheck(w, r)
-	})
+	healthPath := "/health"
+	router.GET(healthPath, handlers.MetricsMiddleware(
+		func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			handlers.HeathCheck(w, r)
+		},
+		healthPath,
+		"GET",
+	))
+
+	// ... metrics endpoint
+	metricPath := "/metrics"
+	router.GET(metricPath, handlers.MetricsMiddleware(
+		func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			promhttp.Handler().ServeHTTP(w, r)
+		},
+		metricPath,
+		"GET",
+	))
 
 	// ... create user endpoint
-	router.POST("/users", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		userHandler.CreateUser(w, r)
-	})
+	createUserPath := "/users"
+	router.POST(createUserPath, handlers.MetricsMiddleware(
+		func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			userHandler.CreateUser(w, r)
+		},
+		createUserPath,
+		"POST",
+	))
 
 	// ... get user by ID endpoint
-	router.GET("/users/:id", handlers.AuthMiddleware(
-		func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-			userHandler.GetUser(w, r)
-		},
-		userHandler.JwtSecret,
-		userHandler.Logger,
+	getUserPath := "/users/:id"
+	router.GET(getUserPath, handlers.MetricsMiddleware(
+		handlers.AuthMiddleware(
+			func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+				userHandler.GetUser(w, r)
+			},
+			userHandler.JwtSecret,
+			userHandler.Logger,
+		),
+		getUserPath,
+		"GET",
 	))
 
 	// ... login user endpoint
-	router.POST("/users/login", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		userHandler.LoginUser(w, r)
-	})
+	loginUserPath := "/users/login"
+	router.POST(loginUserPath, handlers.MetricsMiddleware(
+		func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			userHandler.LoginUser(w, r)
+		},
+		loginUserPath,
+		"POST",
+	))
 
 	return router
 }

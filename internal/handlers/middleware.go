@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"context"
+	"go-rest-api/internal/metrics"
 	"go-rest-api/pkg/logger"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/julienschmidt/httprouter"
@@ -54,4 +56,31 @@ func AuthMiddleware(next httprouter.Handle, jwtKey string, logger logger.CustomL
 		// ... call next handler
 		next(w, r, ps)
 	}
+}
+
+func MetricsMiddleware(next httprouter.Handle, path, method string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		start := time.Now()
+
+		// Use a custom response writer to capture the status code
+		rw := &responseWriter{ResponseWriter: w, status: http.StatusOK}
+		next(rw, r, p)
+
+		duration := time.Since(start)
+
+		// Record the metrics
+		metrics.RequestCount.WithLabelValues(path, method, http.StatusText(rw.status)).Inc()
+		metrics.RequestDuration.WithLabelValues(path, method).Observe(duration.Seconds())
+	}
+}
+
+// responseWriter is a wrapper to capture the HTTP status code.
+type responseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (rw *responseWriter) WriteHeader(status int) {
+	rw.status = status
+	rw.ResponseWriter.WriteHeader(status)
 }
