@@ -8,6 +8,10 @@ import (
 	"github.com/google/uuid"
 )
 
+type UserEventService interface {
+	PublishUserCreatedEvent(ctx context.Context, user *User) error
+}
+
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *User) (*User, error)
 	GetUserByID(ctx context.Context, id string) (*User, error)
@@ -15,14 +19,16 @@ type UserRepository interface {
 }
 
 type UserService struct {
-	repo   UserRepository
-	logger logger.CustomLogger
+	repo             UserRepository
+	logger           logger.CustomLogger
+	userEventService UserEventService
 }
 
-func NewUserService(repo UserRepository, logger logger.CustomLogger) *UserService {
+func NewUserService(repo UserRepository, logger logger.CustomLogger, userEventService UserEventService) *UserService {
 	return &UserService{
-		repo:   repo,
-		logger: logger,
+		repo:             repo,
+		logger:           logger,
+		userEventService: userEventService,
 	}
 }
 
