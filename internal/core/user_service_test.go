@@ -17,7 +17,9 @@ func TestUserService_CreateUser(t *testing.T) {
 	// given
 	mockLogger := logger.MockLogger{}
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	testUser := User{
 		ID:       uuid.New(),
@@ -42,7 +44,9 @@ func TestUserService_CreateUser_ReturnsError(t *testing.T) {
 	// given
 	mockLogger := logger.MockLogger{}
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	testUser := User{
 		ID:       uuid.New(),
@@ -64,7 +68,9 @@ func TestUserService_GetUser(t *testing.T) {
 	// given
 	mockLogger := logger.MockLogger{}
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	testUser := User{
 		ID:        uuid.New(),
@@ -89,7 +95,9 @@ func TestUserService_GetUser_NotFound(t *testing.T) {
 	// given
 	mockLogger := logger.MockLogger{}
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	mockUserRepo.On("GetUserByID", mock.Anything, "non-existent-id").Return(nil, nil)
 
@@ -106,7 +114,9 @@ func TestUserService_GetUser_ReturnAnError(t *testing.T) {
 	// given
 	mockLogger := logger.MockLogger{}
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	mockUserRepo.On("GetUserByID", mock.Anything, "some-id").Return(nil, assert.AnError)
 
@@ -124,7 +134,9 @@ func TestUserService_LoginUser(t *testing.T) {
 	// given
 	mockLogger := logger.MockLogger{}
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	hashedPassword, err := HashPassword("password")
 	testUser := User{
@@ -153,7 +165,9 @@ func TestUserService_Login_WrongPassword(t *testing.T) {
 	mockLogger := logger.MockLogger{}
 	mockLogger.On("Error", mock.Anything, mock.Anything).Return()
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	hashedPassword, err := HashPassword("password")
 	testUser := User{
@@ -182,7 +196,9 @@ func TestUserService_Login_ReturnsError(t *testing.T) {
 	mockLogger := logger.MockLogger{}
 	mockLogger.On("Error", mock.Anything, mock.Anything).Return()
 	mockUserRepo := MockUserRepository{}
-	userService := NewUserService(&mockUserRepo, &mockLogger)
+	mockUserEvent := MockUserEventService{}
+	mockUserEvent.On("PublishUserCreatedEvent", mock.Anything, mock.Anything).Return(nil)
+	userService := NewUserService(&mockUserRepo, &mockLogger, &mockUserEvent)
 
 	mockUserRepo.On("GetUserByEmail", mock.Anything, "non-existent-email").Return(&User{}, assert.AnError)
 

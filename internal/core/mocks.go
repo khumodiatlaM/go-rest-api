@@ -63,3 +63,16 @@ func (s *MockUserService) LoginUserRequest(ctx context.Context, email, password 
 	}
 	return args.Get(0).(*User), args.Error(1)
 }
+
+// ---------------------------------
+// MockUserEventService
+// ---------------------------------
+
+type MockUserEventService struct {
+	mock.Mock
+}
+
+func (s *MockUserEventService) PublishUserCreatedEvent(ctx context.Context, user *User) error {
+	args := s.Called(ctx, user)
+	return args.Error(0)
+}
