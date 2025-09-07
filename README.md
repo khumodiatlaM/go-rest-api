@@ -19,6 +19,7 @@ This project is a boilerplate for building a production-ready REST API in Go. It
 * **Go Modules:** For dependency management.
 * **golang-jwt/jwt/v5:** For secure JWT authentication.
 * **bcrypt:** For secure password hashing.
+* **Kafka:** For asynchronous processing with a message queue.
 * **Prometheus:** For collecting and monitoring API metrics.
 * **Makefile:** For automating common tasks like building, testing, and running migrations.
 
@@ -36,6 +37,7 @@ The project is organized into the following directories:
 │   ├── handlers/       # HTTP handlers
 │   └── db/             # Data access layer
 |   └── metrics/        # Prometheus metrics setup
+|   └── kafka/          # Kafka producer 
 ├── pkg/                # Shared utilities and packages  
 ├── docs/               # API documentation
 ├── migrations/         # Database migration files
