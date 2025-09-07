@@ -5,8 +5,10 @@ import (
 	"go-rest-api/internal/core"
 	userRepo "go-rest-api/internal/db"
 	"go-rest-api/internal/handlers"
+	"go-rest-api/internal/kafka_handlers"
 	"go-rest-api/pkg/database"
 	httpserver "go-rest-api/pkg/http"
+	"go-rest-api/pkg/kafka"
 	"go-rest-api/pkg/logger"
 )
 
@@ -40,8 +42,18 @@ func main() {
 	// ... initialize user repository adapter
 	userRepository := userRepo.NewUserRepository(db, logger)
 
+	// ... initialize kafka producer
+	kafkaProucer, err := kafka.NewProducer(cfg.Kafka.Brokers, logger)
+	if err != nil {
+		logger.Fatal("Failed to initialize Kafka producer", "error", err)
+	}
+	defer kafkaProucer.Close()
+
+	// ... initialize user event service
+	userEventServ := kafka_handlers.NewUserEventService(&kafkaProucer, logger, cfg.Kafka.Topic)
+
 	// ... initialize user service
-	userService := core.NewUserService(userRepository, logger)
+	userService := core.NewUserService(userRepository, logger, userEventServ)
 
 	// ... initialize user handler
 	userHandler := handlers.NewUserHandler(userService, logger, cfg.JWTSecret)

@@ -42,7 +42,20 @@ func (s *UserService) CreateUser(ctx context.Context, user *User) (*User, error)
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 	user.Password = hashedPassword
-	return s.repo.CreateUser(ctx, user)
+	result, err := s.repo.CreateUser(ctx, user)
+	if err != nil {
+		s.logger.Error("failed to create user: ", err)
+		return nil, err
+	}
+
+	// ... publish user created event
+	go func() {
+		if err := s.userEventService.PublishUserCreatedEvent(ctx, user); err != nil {
+			s.logger.Error("failed to publish user created event: ", err)
+		}
+	}()
+
+	return result, nil
 }
 
 func (s *UserService) GetUserByID(ctx context.Context, id string) (*User, error) {

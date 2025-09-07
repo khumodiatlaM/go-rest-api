@@ -19,6 +19,7 @@ func NewProducer(brokers string, logger logger.CustomLogger) (Producer, error) {
 		logger.Error("failed to create kafka producer", err)
 		return Producer{}, err
 	}
+	logger.Info("kafka producer created")
 	return Producer{
 		producer: producer,
 		log:      logger,
