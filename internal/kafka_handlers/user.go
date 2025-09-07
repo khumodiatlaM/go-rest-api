@@ -28,5 +28,11 @@ func (s UserEventService) PublishUserCreatedEvent(ctx context.Context, user *cor
 		s.logger.Error("failed to marshal user data: ", err)
 		return err
 	}
-	return s.producer.Produce(s.topic, user.ID.String(), userDataBytes)
+	err = s.producer.Produce(s.topic, user.ID.String(), userDataBytes)
+	if err != nil {
+		s.logger.Error("failed to produce user created event: ", err)
+		return err
+	}
+	s.logger.Info("user created event successfully published to topic: ", s.topic)
+	return nil
 }

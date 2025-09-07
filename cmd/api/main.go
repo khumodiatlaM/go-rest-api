@@ -43,7 +43,7 @@ func main() {
 	userRepository := userRepo.NewUserRepository(db, logger)
 
 	// ... initialize kafka producer
-	kafkaProucer, err := kafka.NewProducer(cfg.Kafka.Brokers, logger)
+	kafkaProucer, err := kafka.NewProducer(cfg.Kafka.Broker, logger)
 	if err != nil {
 		logger.Fatal("Failed to initialize Kafka producer", "error", err)
 	}
