@@ -4,6 +4,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+type KafkaConfig struct {
+	Brokers string `mapstructure:"KAFKA_BROKERS"`
+	Topic   string `mapstructure:"KAFKA_TOPIC"`
+}
 type Config struct {
 	DBHost     string `mapstructure:"DB_HOST"`
 	DBPort     string `mapstructure:"DB_PORT"`
@@ -12,6 +16,7 @@ type Config struct {
 	DBName     string `mapstructure:"DB_NAME"`
 	APIPort    string `mapstructure:"API_PORT"`
 	JWTSecret  string `mapstructure:"JWT_SECRET"`
+	Kafka      KafkaConfig
 }
 
 // LoadConfig reads configuration from file or environment variables.
